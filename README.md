@@ -31,6 +31,11 @@ itemdef = {
     -- on this item moved to another index and/or list
     _on_inventory_move_allow = function(itemstack, player, info) end, --> return 0 to cancel or num of items to allow
     -- on this item moved to another index and/or list
+    --[[
+        info = {
+            stack = ItemStack, [to,from]_[index] = number|nil,  [to,from]_[list] = string|nil
+        }
+    --]]
     _on_inventory_moved = function(itemstack, player, info) end,
     -- before creating an item entity
     _on_drop = function(itemstack, player) end, --> return ==false to cancel
@@ -38,23 +43,20 @@ itemdef = {
     _on_dropped = function(itemstack, player, object) end,
     -- when in an inventory list that is registered as an equipment list (e.g. armor, accessories)
     _on_equipment_step = function(itemstack, player, dtime, list_name, list_index) end,
-    --[[
-        inventory_info = {
-            stack = ItemStack, [to,from]_[list,index] = number|nil
-        }
-    --]]
     -- when first moved to equipment list
-    _on_equipped = function(itemstack, player, inventory_info) end, --> void
+    _on_equipped = function(itemstack, player, info) end, --> void
     -- when moved from equipment list
-    _on_unequipped = function(itemstack, player, inventory_info) end, --> void
+    _on_unequipped = function(itemstack, player, info) end, --> void
 }
 
-ItemExtensions.on_move.bind_group_to_inventory_list(item_group_name, inventory_list_name)
-ItemExtensions.on_move.bind_group_to_inventory_slot(item_group_name, inventory_list_name, list_index)
+itemextensions.bind_group_to_inventory_list(item_group_name, inventory_list_name)
+itemextensions.bind_group_to_inventory_slot(item_group_name, inventory_list_name, list_index)
 
-ItemExtensions.on_move.register_on_move_item("my_mod:my_item", function(itemstack, player, info) end)
-
-ItemExtensions.wield.register_on_select(function(itemstack, player) end) --> return ItemStack to modify or nil
-ItemExtensions.wield.register_on_deselect(function(itemstack, player) end) --> return ItemStack to modify or nil
-ItemExtensions.wield.register_on_step(function(itemstack, player, dtime) end) --> return ItemStack to modify or nil
+-- Note that it is possible the stack is not in its original form by the time your callback runs on it.
+-- This is the case for all of the below.
+-- Callbacks are run regardless of whether the name has changed.
+itemextensions.register_on_move_item("my_mod:my_item", function(itemstack, player, info) end)
+itemextensions.register_on_select(function(itemstack, player) end) --> return ItemStack to modify or nil
+itemextensions.register_on_deselect(function(itemstack, player) end) --> return ItemStack to modify or nil
+itemextensions.register_on_wield_step(function(itemstack, player, dtime) end) --> return ItemStack to modify or nil
 ```
