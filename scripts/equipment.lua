@@ -80,7 +80,7 @@ function itemextensions.equipment._on_player_step(player, dtime)
 				end
 			end
 			-- change the item in inventory if there was a return
-			if old_stack:equals(stack) then
+			if not old_stack:equals(stack) then
 				inv:set_stack(listname, k, stack)
 				if (wield_list == listname) and (wield_index == k) then
 					pi.last_list = listname
