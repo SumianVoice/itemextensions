@@ -60,7 +60,7 @@ function itemextensions.equipment._is_equipped(itemstack, player, list_name, lis
 end
 
 function itemextensions.equipment._on_player_step(player, dtime)
-	local pi = itemextensions.pi(player)
+	local pi = itemextensions.pi(player) or {}
 	local inv = player:get_inventory()
 	local wield_list = player:get_wield_list()
 	local wield_index = player:get_wield_index()

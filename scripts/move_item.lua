@@ -1,12 +1,34 @@
 
 itemextensions.on_move = {}
 
-itemextensions.on_move.listeners = {}
+itemextensions.on_move.registered_on_move_item = {}
+itemextensions.on_move.registered_on_any_item_changed = {}
 
--- register a callback to be notified when an item is moved, put or taken from any player inventory
+-- Register a callback to be notified when a specific item is moved, put or taken from any player inventory.
+--[[
+
+	itemextensions.register_on_move_item(item_name, function(itemstack, player, info)
+		-- return itemstack or nil
+	end
+]]
 function itemextensions.register_on_move_item(name, func)
-	if not itemextensions.on_move.listeners[name] then itemextensions.on_move.listeners[name] = {} end
-	table.insert(itemextensions.on_move.listeners[name], func)
+	if not itemextensions.on_move.registered_on_move_item[name] then
+		itemextensions.on_move.registered_on_move_item[name] = {}
+	end
+	table.insert(itemextensions.on_move.registered_on_move_item[name], func)
+end
+
+-- Register a callback to be notified when any item is changed in any manner including metadata and wear, by polling the entire inventory.
+-- Does not handle any return value or modify the inventory.
+--[[
+
+	itemextensions.register_on_any_item_changed(function(itemstack, player, listname, listindex, oldstack)
+		core.log(tostring(itemstack))
+		return nil
+	end)
+]]
+function itemextensions.register_on_any_item_changed(func)
+	table.insert(itemextensions.on_move.registered_on_any_item_changed, func)
 end
 
 -- make a standard inventory_info table instead of having to do this logic within other functions
@@ -42,6 +64,12 @@ core.register_on_player_inventory_action(function(player, action, inventory, inv
 end)
 
 
+function itemextensions.on_move._on_any_item_changed(itemstack, player, listname, listindex, oldstack)
+	for i, func in pairs(itemextensions.on_move.registered_on_any_item_changed) do
+		func(ItemStack(itemstack), player, listname, listindex, oldstack)
+	end
+end
+
 function itemextensions.on_move._on_moved(player, info)
 	if not info.to_stack then
 		return
@@ -55,7 +83,7 @@ function itemextensions.on_move._on_moved(player, info)
 		stack = idef._on_inventory_moved(ItemStack(stack), player, info) or stack
 	end
 
-	for i, func in pairs(itemextensions.on_move.listeners[name] or {}) do
+	for i, func in pairs(itemextensions.on_move.registered_on_move_item[name] or {}) do
 		stack = func(ItemStack(stack), player, info) or stack
 	end
 
@@ -146,4 +174,30 @@ core.register_allow_player_inventory_action(function(player, action, inventory, 
 
 	-- return 0 will prevent any item from being moved
 	return 0
+end)
+
+-- poll entire inventory every step to see absolutely all changes
+-- this is contextless of course so useless for making changes in response
+local _i = 0
+core.register_globalstep(function(dtime)
+	local playerlist = core.get_connected_players()
+	local count = #playerlist
+	for k = 1, 10 do
+		_i = _i + 1
+		if _i > count then _i = 0; break end
+		local player = playerlist[_i]
+		local pi = itemextensions.pi(player) or {}
+		local inv = player:get_inventory()
+		if not pi.last_lists then pi.last_lists = inv:get_lists() end
+		for listname, list in pairs(inv:get_lists()) do
+			for i, itemstack in ipairs(list) do
+				local oldstack = (pi.last_lists[listname] or {})[i] or ItemStack("")
+				if not (itemstack:equals(oldstack)) then
+					itemextensions.on_move._on_any_item_changed(itemstack, player, listname, i, oldstack)
+				end
+			end
+		end
+		local new_lists = inv:get_lists()
+		pi.last_lists = new_lists
+	end
 end)

@@ -165,13 +165,13 @@ core.register_on_mods_loaded(function()
 	local core_item_drop = core.item_drop
 	---@diagnostic disable-next-line: duplicate-set-field
 	core.item_drop = function(itemstack, dropper, pos)
-		if not dropper:is_player() then
+		local pi = itemextensions.pi(dropper)
+		if not pi then
 			return core_item_drop(itemstack, dropper, pos)
 		end
 
 		-- no idea how any of this works anymore have fun
 
-		local pi = itemextensions.pi(dropper)
 		local do_set = false
 		local idef = itemstack:get_definition()
 
