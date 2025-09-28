@@ -2,6 +2,7 @@
 itemextensions.on_move = {}
 
 itemextensions.on_move.registered_on_move_item = {}
+itemextensions.on_move.registered_on_move_any_item = {}
 itemextensions.on_move.registered_on_any_item_changed = {}
 
 -- Register a callback to be notified when a specific item is moved, put or taken from any player inventory.
@@ -9,13 +10,36 @@ itemextensions.on_move.registered_on_any_item_changed = {}
 
 	itemextensions.register_on_move_item(item_name, function(itemstack, player, info)
 		-- return itemstack or nil
-	end
+	end)
 ]]
 function itemextensions.register_on_move_item(name, func)
 	if not itemextensions.on_move.registered_on_move_item[name] then
 		itemextensions.on_move.registered_on_move_item[name] = {}
 	end
 	table.insert(itemextensions.on_move.registered_on_move_item[name], func)
+end
+
+-- Register a callback to be notified when any item is moved, put or taken from any player inventory.
+--[[
+
+	itemextensions.register_on_move_any_item(function(itemstack, player, info)
+		-- return itemstack or nil
+	end)
+
+	info = {
+		-- take, move
+		from_stack : ItemStack
+		from_list : string | nil
+		from_index : number | nil
+		-- put, move
+		to_stack : ItemStack | nil
+		to_list : string | nil
+		to_index : number | nil
+		stack : ItemStack
+	}
+]]
+function itemextensions.register_on_move_any_item(func)
+	table.insert(itemextensions.on_move.registered_on_move_any_item, func)
 end
 
 -- Register a callback to be notified when any item is changed in any manner including metadata and wear, by polling the entire inventory.
@@ -84,6 +108,10 @@ function itemextensions.on_move._on_moved(player, info)
 	end
 
 	for i, func in pairs(itemextensions.on_move.registered_on_move_item[name] or {}) do
+		stack = func(ItemStack(stack), player, info) or stack
+	end
+
+	for i, func in pairs(itemextensions.on_move.registered_on_move_any_item) do
 		stack = func(ItemStack(stack), player, info) or stack
 	end
 

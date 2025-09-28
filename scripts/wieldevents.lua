@@ -176,7 +176,7 @@ core.register_on_mods_loaded(function()
 		local idef = itemstack:get_definition()
 
 		if idef._on_drop then
-			local ret = idef._on_drop(ItemStack(itemstack), player)
+			local ret = idef._on_drop(ItemStack(itemstack), dropper)
 			if ret == false then
 				return itemstack, nil
 			else
@@ -198,7 +198,7 @@ core.register_on_mods_loaded(function()
 		itemstack, item_obj = core_item_drop(itemstack, dropper, pos)
 
 		if item_obj and idef._on_dropped then
-			local ret = idef._on_dropped(itemstack, player, item_obj)
+			local ret = idef._on_dropped(itemstack, dropper, item_obj)
 			if ret then
 				itemstack = ret
 				do_set = true

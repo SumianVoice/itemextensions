@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global
 
 local has_playerphysics = core.get_modpath("playerphysics")
 core.register_tool("itemextensions:test", {
