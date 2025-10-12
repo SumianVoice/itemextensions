@@ -64,7 +64,7 @@ local function player_tick(player, dtime)
 	local previous
 	if not first_tick_for_player and pi.last_index then
 		previous = {
-			stack = pi.last_stack
+			stack = pi.last_stack or ItemStack("")
 		}
 	end
 
