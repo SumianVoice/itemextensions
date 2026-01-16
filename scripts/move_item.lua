@@ -98,7 +98,7 @@ function itemextensions.on_move._on_moved(player, info)
 	if not info.to_stack then
 		return
 	end
-	local stack = info.to_stack
+	local stack = ItemStack(info.to_stack)
 	local name = stack:get_name()
 	local idef = stack:get_definition()
 	if not idef then return end
@@ -126,6 +126,7 @@ core.register_on_joinplayer(function(player, last_login)
 		if not inv then return end
 		for listname, list in pairs(inv:get_lists()) do
 			for i, stack in ipairs(list) do
+				stack = ItemStack(stack)
 				local name = stack:get_name()
 				if (name ~= "") then
 					itemextensions.on_move._on_moved(player, {

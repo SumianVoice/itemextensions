@@ -57,7 +57,7 @@ local function player_tick(player, dtime)
 	local inv = player:get_inventory()
 
 	local current = {}
-	current.stack = player:get_wielded_item()
+	current.stack = ItemStack(player:get_wielded_item())
 	current.list = player:get_wield_list()
 	current.index = player:get_wield_index()
 
