@@ -14,3 +14,4 @@ end
 dofile(mod_path .. "/scripts/equipment.lua")
 dofile(mod_path .. "/scripts/move_item.lua")
 dofile(mod_path .. "/scripts/wieldevents.lua")
+dofile(mod_path .. "/scripts/node_drops.lua")

@@ -47,6 +47,8 @@ itemdef = {
     _on_equipped = function(itemstack, player, info) end, --> void
     -- when moved from equipment list
     _on_unequipped = function(itemstack, player, info) end, --> void
+    -- circumvents / stands in for `core.get_node_drops`
+    _get_node_drops = function(node, toolname) end --> list of itemstacks: table[i] = ItemStack
 }
 
 itemextensions.bind_group_to_inventory_list(item_group_name, inventory_list_name)
