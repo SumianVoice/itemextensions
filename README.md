@@ -16,6 +16,7 @@ This API aims to provide easy high and medium level features to maximise the con
 - Control over item movement
     - Game can decide that some lists will only allow some item groups to be placed in them, e.g. for armor or backpacks
     - Same as above but for individual inventory slots
+- Can control which drops are given by overriding `_get_node_drops` in node/item definitions
 
 ## API list
 ```lua
@@ -29,13 +30,13 @@ itemdef = {
     -- every step whether wielded or not
     _on_inventory_step = function(itemstack, player, dtime, list_name, list_index) end,
     -- on this item moved to another index and/or list
-    _on_inventory_move_allow = function(itemstack, player, info) end, --> return 0 to cancel or num of items to allow
-    -- on this item moved to another index and/or list
     --[[
         info = {
             stack = ItemStack, [to,from]_[index] = number|nil,  [to,from]_[list] = string|nil
         }
     --]]
+    _on_inventory_move_allow = function(itemstack, player, info) end, --> return 0 to cancel or num of items to allow
+    -- on this item moved to another index and/or list
     _on_inventory_moved = function(itemstack, player, info) end,
     -- before creating an item entity
     _on_drop = function(itemstack, player) end, --> return ==false to cancel
@@ -51,14 +52,31 @@ itemdef = {
     _get_node_drops = function(node, toolname) end --> list of itemstacks: table[i] = ItemStack
 }
 
+-- If any slot has a bound group name, no other items may be moved there. You may bind multiple groups to one slot/list.
 itemextensions.bind_group_to_inventory_list(item_group_name, inventory_list_name)
 itemextensions.bind_group_to_inventory_slot(item_group_name, inventory_list_name, list_index)
 
 -- Note that it is possible the stack is not in its original form by the time your callback runs on it.
--- This is the case for all of the below.
--- Callbacks are run regardless of whether the name has changed.
-itemextensions.register_on_move_item("my_mod:my_item", function(itemstack, player, info) end)
-itemextensions.register_on_select(function(itemstack, player) end) --> return ItemStack to modify or nil
-itemextensions.register_on_deselect(function(itemstack, player) end) --> return ItemStack to modify or nil
-itemextensions.register_on_wield_step(function(itemstack, player, dtime) end) --> return ItemStack to modify or nil
+-- This is the case for all of the below. Return a second argument of true to stop further callbacks in this stack.
+-- Callbacks are run regardless of whether the name has changed otherwise.
+
+-- There is no change allowed for this callback but you can manually edit the inventory if needed.
+-- Note however, that this callback will run a second time if you modify the stack.
+itemextensions.register_on_any_item_changed(function(itemstack, player, listname, listindex, oldstack) end) 
+-- This item name moved index and/or list
+itemextensions.register_on_move_item("my_mod:my_item", function(itemstack, player, info)
+    return ItemStack or nil, true or nil
+end)
+-- Any item is now wielded
+itemextensions.register_on_select(function(itemstack, player)
+    return ItemStack or nil, true or nil
+end)
+-- Any item is no longer wielded
+itemextensions.register_on_deselect(function(itemstack, player)
+    return ItemStack or nil, true or nil
+end)
+-- While item is wielded, on and after `select`ed and before `deselect`ed
+itemextensions.register_on_wield_step(function(itemstack, player, dtime)
+    return ItemStack or nil, true or nil
+end)
 ```

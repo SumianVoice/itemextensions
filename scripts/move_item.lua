@@ -103,16 +103,23 @@ function itemextensions.on_move._on_moved(player, info)
 	local idef = stack:get_definition()
 	if not idef then return end
 
+	-- if any func returns true as a second arg, abort and don't do futher callbacks
+	local abort = false
 	if idef._on_inventory_moved then
-		stack = idef._on_inventory_moved(ItemStack(stack), player, info) or stack
+		local changed_stack, is_abort = idef._on_inventory_moved(ItemStack(stack), player, info)
+		stack = changed_stack or stack; abort = is_abort
 	end
 
 	for i, func in pairs(itemextensions.on_move.registered_on_move_item[name] or {}) do
-		stack = func(ItemStack(stack), player, info) or stack
+		if abort then break end
+		local changed_stack, is_abort = func(ItemStack(stack), player, info)
+		stack = changed_stack or stack; abort = is_abort
 	end
 
 	for i, func in pairs(itemextensions.on_move.registered_on_move_any_item) do
-		stack = func(ItemStack(stack), player, info) or stack
+		if abort then break end
+		local changed_stack, is_abort = func(ItemStack(stack), player, info)
+		stack = changed_stack or stack; abort = is_abort
 	end
 
 	itemextensions.equipment._test_and_call_equipment(stack, player, info, idef)
