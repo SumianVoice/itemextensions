@@ -179,7 +179,7 @@ core.register_on_mods_loaded(function()
 			local ret = idef._on_drop(ItemStack(itemstack), dropper)
 			if ret == false then
 				return itemstack, nil
-			else
+			elseif ret ~= nil then
 				itemstack = ret
 				do_set = true
 			end
