@@ -56,13 +56,14 @@ itemdef = {
 itemextensions.bind_group_to_inventory_list(item_group_name, inventory_list_name)
 itemextensions.bind_group_to_inventory_slot(item_group_name, inventory_list_name, list_index)
 
+-- There is no change allowed for this callback but you can manually edit the inventory if needed.
+-- Note however, that this callback will run a second time if you modify the stack.
+itemextensions.register_on_any_item_changed(function(itemstack, player, listname, listindex, oldstack) end) 
+
 -- Note that it is possible the stack is not in its original form by the time your callback runs on it.
 -- This is the case for all of the below. Return a second argument of true to stop further callbacks in this stack.
 -- Callbacks are run regardless of whether the name has changed otherwise.
 
--- There is no change allowed for this callback but you can manually edit the inventory if needed.
--- Note however, that this callback will run a second time if you modify the stack.
-itemextensions.register_on_any_item_changed(function(itemstack, player, listname, listindex, oldstack) end) 
 -- This item name moved index and/or list
 itemextensions.register_on_move_item("my_mod:my_item", function(itemstack, player, info)
     return ItemStack or nil, true or nil
