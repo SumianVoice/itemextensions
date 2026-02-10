@@ -128,9 +128,8 @@ end
 -- when joining, pretend all the items got put in the inventory, in case they need to run init
 core.register_on_joinplayer(function(player, last_login)
 	core.after(0.1, function()
-		if not player then return end
+		if not core.is_player(player) then return end
 		local inv = player:get_inventory()
-		if not inv then return end
 		for listname, list in pairs(inv:get_lists()) do
 			for i, stack in ipairs(list) do
 				stack = ItemStack(stack)
@@ -139,7 +138,8 @@ core.register_on_joinplayer(function(player, last_login)
 					itemextensions.on_move._on_moved(player, {
 						to_list = listname,
 						to_index = i,
-						from_stack = stack,
+						from_stack = nil,
+						to_stack = stack,
 						stack = stack,
 						is_from_joining = true,
 					})
