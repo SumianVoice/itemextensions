@@ -67,9 +67,11 @@ local function fix_bad_inventory_info_fields(player, action, inventory, inventor
 		info.from_stack = inventory:get_stack(inventory_info.from_list, inventory_info.from_index)
 		info.to_stack = inventory:get_stack(inventory_info.to_list, inventory_info.to_index)
 		info.stack = info.from_stack
+		info.count = inventory_info.count
 	elseif (action == "put") then
 		info.to_list = inventory_info.listname
 		info.to_index = inventory_info.index
+		info.to_stack = inventory:get_stack(inventory_info.listname, inventory_info.index)
 		info.from_stack = inventory_info.stack
 		info.stack = inventory_info.stack
 	elseif (action == "take") then
@@ -175,14 +177,14 @@ end
 core.register_allow_player_inventory_action(function(player, action, inventory, inventory_info)
 	local info = fix_bad_inventory_info_fields(player, action, inventory, inventory_info)
 
-	-- core.log(tostring(info.from_stack) .. "  :  " .. tostring(info.to_stack))
+	-- core.log(tostring(info.stack) .. "  :  " .. tostring(info.to_stack) .. "  :  " .. tostring(info.count))
 
-	local idef = info.from_stack and info.from_stack:get_definition()
+	local idef = info.stack and info.stack:get_definition()
 	if not idef then return end
 
 	-- run any callbacks in the item
 	if idef._on_inventory_move_allow then
-		local ret = idef._on_inventory_move_allow(info.from_stack, player, info)
+		local ret = idef._on_inventory_move_allow(info.stack, player, info)
 		if ret ~= nil then return ret end
 	end
 

@@ -32,7 +32,10 @@ itemdef = {
     -- on this item moved to another index and/or list
     --[[
         info = {
-            stack = ItemStack, [to,from]_[index] = number|nil,  [to,from]_[list] = string|nil
+            stack = ItemStack, -- the stack that is the thing being moved
+            [to,from]_stack = number|nil, [to,from]_index = number|nil,  [to,from]_list = string|nil,
+            count = number|nil,
+            -- to_stack means the stack that is not changed yet but will have the stack added to
         }
     --]]
     _on_inventory_move_allow = function(itemstack, player, info) end, --> return 0 to cancel or num of items to allow

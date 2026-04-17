@@ -10,29 +10,28 @@ itemextensions.wield = {}
 
 -- [1] _on_select, [2] _on_deselect, [3] _on_step
 local registers = {
-	{}, {}, {},
+	{}, {}, {}, {},
 }
+
+local function _handle_callbacks(stack, player, n)
+	for i, func in ipairs(registers[n]) do
+		stack = func(ItemStack(stack), player) or stack
+	end
+	return stack
+end
 
 -- call all registered funcs for this event
 local function on_select(stack, player)
-	for i, func in ipairs(registers[1]) do
-		stack = func(ItemStack(stack), player) or stack
-	end
-	return stack
+	return _handle_callbacks(stack, player, 1)
 end
--- call all registered funcs for this event
 local function on_deselect(stack, player)
-	for i, func in ipairs(registers[2]) do
-		stack = func(ItemStack(stack), player) or stack
-	end
-	return stack
+	return _handle_callbacks(stack, player, 2)
 end
--- call all registered funcs for this event
 local function on_step(stack, player, dtime)
-	for i, func in ipairs(registers[3]) do
-		stack = func(ItemStack(stack), player, dtime) or stack
-	end
-	return stack
+	return _handle_callbacks(stack, player, 3)
+end
+local function on_drop(stack, player, dtime)
+	return _handle_callbacks(stack, player, 4)
 end
 
 -- function(stack, player) ==> nil | itemstack
@@ -174,21 +173,26 @@ core.register_on_mods_loaded(function()
 
 		local do_set = false
 		local idef = itemstack:get_definition()
+		local old_stack = ItemStack(itemstack)
 
-		if idef._on_drop then
-			local ret = idef._on_drop(ItemStack(itemstack), dropper)
+		do -- callbacks
+			local ret
+			ret = on_drop(ItemStack(itemstack), dropper)
+			if ret then idef = itemstack:get_definition() end -- update stack def
+			ret = (idef._on_drop and idef._on_drop(ItemStack(ret or itemstack), dropper)) or ret
 			if ret == false then
 				return itemstack, nil
-			elseif ret ~= nil then
-				itemstack = ret
+			elseif (ret ~= nil) and not ret:equals(itemstack) then
+				itemstack_changed = true -- later, only set if there's a change
+				itemstack = ItemStack(ret)
 				do_set = true
 			end
 		end
 
 		-- could be incorrect, may require testing for if will be empty
 		-- might also be completely unnecessary
-		if itemstack:equals(dropper:get_wielded_item()) then
-			itemstack = deselect_wielded(dropper, itemstack, false) or itemstack
+		if old_stack:equals(dropper:get_wielded_item()) then
+			itemstack = deselect_wielded(dropper, ItemStack(itemstack), false) or itemstack
 			pi.last_list = dropper:get_wield_list()
 			pi.last_index = dropper:get_wield_index()
 			do_set = true
