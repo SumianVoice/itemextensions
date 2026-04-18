@@ -80,6 +80,7 @@ local function fix_bad_inventory_info_fields(player, action, inventory, inventor
 		info.from_stack = inventory_info.stack
 		info.stack = inventory_info.stack
 	end
+	info.action = action
 	return info
 end
 
