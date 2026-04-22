@@ -1,18 +1,18 @@
 ---@diagnostic disable: undefined-global
 
-local has_playerphysics = core.get_modpath("playerphysics")
+local playerphysics = (core.get_modpath("playerphysics") ~= nil) and _G.playerphysics
 core.register_tool("itemextensions:test", {
 	description = "itemextensions:test",
 	groups = { combat = 2, not_in_creative_inventory = 1 },
 
 	_on_select = function(stack, player)
-		if has_playerphysics then
+		if playerphysics then
 			playerphysics.add_physics_factor(player, "gravity", "itemextensions:test", 0.5)
 			playerphysics.add_physics_factor(player, "speed", "itemextensions:test", 1.5)
 		end
 	end,
 	_on_deselect = function(stack, player)
-		if has_playerphysics then
+		if playerphysics then
 			playerphysics.remove_physics_factor(player, "gravity", "itemextensions:test")
 			playerphysics.remove_physics_factor(player, "speed", "itemextensions:test")
 		end
